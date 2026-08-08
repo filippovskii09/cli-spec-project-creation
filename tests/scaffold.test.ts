@@ -24,6 +24,10 @@ test("initializes documentation and optional OpenSpec workspace", async () => {
     "05-architecture.md",
     "06-implementation-plan.md",
   ]);
+  assert.match(
+    await readFile(join(destination, "docs", "02-domain.md"), "utf8"),
+    /### Project Documentation/,
+  );
   assert.equal(await readFile(join(destination, "openspec", "README.md"), "utf8"), "# Demo Project OpenSpec\n");
   assert.match(await readFile(join(destination, "package.json"), "utf8"), /"name": "demo-project"/);
 });
