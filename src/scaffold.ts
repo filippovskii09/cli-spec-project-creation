@@ -1,8 +1,11 @@
+import { execFile as execFileCallback } from "node:child_process";
 import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 const templateDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "../../templates");
+const execFile = promisify(execFileCallback);
 
 export interface ScaffoldOptions {
   projectName: string;
@@ -33,8 +36,7 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<string>
   await mkdir(join(destination, "src"), { recursive: true });
   await mkdir(join(destination, "tests"), { recursive: true });
   if (options.initializeOpenSpec) {
-    await mkdir(join(destination, "openspec"), { recursive: true });
-    await writeFile(join(destination, "openspec", "README.md"), `# ${projectName} OpenSpec\n`);
+    await initializeOpenSpec(destination);
   }
 
   await writeFile(
@@ -43,6 +45,15 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<string>
   );
 
   return destination;
+}
+
+async function initializeOpenSpec(destination: string): Promise<void> {
+  try {
+    await execFile("openspec", ["init", "--tools", "none", "--no-animation", "--no-copilot-cloud", destination]);
+  } catch (error) {
+    const details = error instanceof Error ? error.message : String(error);
+    throw new Error(`OpenSpec initialization failed: ${details}`);
+  }
 }
 
 function toPackageName(projectName: string): string {

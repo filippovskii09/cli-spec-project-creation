@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
+import { basename, resolve } from "node:path";
 import { promptForProject } from "./prompts.js";
 import { scaffoldProject } from "./scaffold.js";
 
@@ -20,8 +21,9 @@ export async function run(argv = process.argv.slice(2)): Promise<void> {
   }
 
   const directory = positionals[0] ?? ".";
-  const answers = values.name
-    ? { projectName: values.name, targetDirectory: directory, initializeOpenSpec: values.openspec }
+  const projectName = values.name ?? (directory === "." ? undefined : basename(resolve(directory)));
+  const answers = projectName
+    ? { projectName, targetDirectory: directory, initializeOpenSpec: values.openspec }
     : await promptForProject(directory);
   const destination = await scaffoldProject(answers);
   console.log(`Created ${answers.projectName} in ${destination}`);
@@ -33,4 +35,3 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exitCode = 1;
   });
 }
-

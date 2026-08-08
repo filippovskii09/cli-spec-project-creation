@@ -12,20 +12,16 @@ export async function promptForProject(defaultDirectory = "."): Promise<ProjectA
 
   try {
     const projectName = (await readline.question("Project name: ")).trim();
-    const targetDirectory =
-      (await readline.question(`Destination directory (${defaultDirectory}): `)).trim() ||
-      defaultDirectory;
     const openSpecAnswer = (await readline.question("Initialize OpenSpec? (y/N): "))
       .trim()
       .toLowerCase();
 
     return {
       projectName,
-      targetDirectory,
+      targetDirectory: defaultDirectory,
       initializeOpenSpec: openSpecAnswer === "y" || openSpecAnswer === "yes",
     };
   } finally {
     readline.close();
   }
 }
-
