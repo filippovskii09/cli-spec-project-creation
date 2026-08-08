@@ -32,6 +32,11 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<string>
 
   await mkdir(join(destination, "src"), { recursive: true });
   await mkdir(join(destination, "tests"), { recursive: true });
+  if (options.initializeOpenSpec) {
+    await mkdir(join(destination, "openspec"), { recursive: true });
+    await writeFile(join(destination, "openspec", "README.md"), `# ${projectName} OpenSpec\n`);
+  }
+
   await writeFile(
     join(destination, "package.json"),
     JSON.stringify({ name: toPackageName(projectName), private: true, version: "0.1.0" }, null, 2) + "\n",
