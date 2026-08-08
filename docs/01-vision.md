@@ -1,4 +1,39 @@
-# Product vision
+# 01 — Vision
 
-`create-spec-project` helps a team begin a project with an explicit product specification, shared AI-agent instructions, and an optional OpenSpec workspace.
+## Problem
 
+Створення нового pet/project часто починається хаотично:
+
+* вручну створюються docs;
+* окремо ініціалізується OpenSpec;
+* окремо створюються `CLAUDE.md` / `AGENTS.md`;
+* структура між проектами відрізняється;
+* AI отримує різний контекст і workflow.
+
+## Vision
+
+`create-spec-project` — локальний CLI для швидкого створення однакової AI-native / spec-driven структури нового проекту.
+
+CLI не визначає технологічний стек проекту.
+
+Він створює базовий development framework від idea/discovery до implementation.
+
+## Target User
+
+Перший користувач — автор CLI.
+
+## Core Value
+
+Одна команда повинна прибрати повторюваний setup нового проекту та дати однакову стартову структуру для AI-assisted development.
+
+## Non-Goals
+
+V1 не включає:
+
+* генерацію frontend/backend stack;
+* plugin system;
+* presets;
+* deployment;
+* CI/CD;
+* автоматичну генерацію бізнес-вимог;
+* складну конфігурацію.
