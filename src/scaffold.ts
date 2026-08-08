@@ -1,61 +1,28 @@
-import { execFile as execFileCallback } from "node:child_process";
-import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { promisify } from "node:util";
+import { cp, mkdir, readdir } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const templateDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "../../templates");
-const execFile = promisify(execFileCallback);
 
-export interface ScaffoldOptions {
-  projectName: string;
-  targetDirectory: string;
-  initializeOpenSpec: boolean;
-}
+export async function scaffoldProject(targetDirectory: string): Promise<string> {
+  const destination = resolve(targetDirectory);
+  let contents: string[] | undefined;
 
-export async function scaffoldProject(options: ScaffoldOptions): Promise<string> {
-  const projectName = options.projectName.trim();
-  if (!projectName) {
-    throw new Error("Project name is required.");
+  try {
+    contents = await readdir(destination);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
 
-  const destination = resolve(options.targetDirectory);
-  const contents = await readdir(destination).catch((error: NodeJS.ErrnoException) => {
-    if (error.code === "ENOENT") return [];
-    throw error;
-  });
-  if (contents.length > 0) {
+  if (contents && contents.length > 0) {
     throw new Error(`Destination is not empty: ${destination}`);
   }
 
-  await mkdir(destination, { recursive: true });
-  await cp(join(templateDirectory, "docs"), join(destination, "docs"), { recursive: true });
-  await cp(join(templateDirectory, "CLAUDE.md"), join(destination, "CLAUDE.md"));
-  await cp(join(templateDirectory, "AGENTS.md"), join(destination, "AGENTS.md"));
-
-  await mkdir(join(destination, "src"), { recursive: true });
-  await mkdir(join(destination, "tests"), { recursive: true });
-  if (options.initializeOpenSpec) {
-    await initializeOpenSpec(destination);
+  if (!contents) {
+    await mkdir(destination, { recursive: true });
   }
 
-  await writeFile(
-    join(destination, "package.json"),
-    JSON.stringify({ name: toPackageName(projectName), private: true, version: "0.1.0" }, null, 2) + "\n",
-  );
+  await cp(templateDirectory, destination, { recursive: true });
 
   return destination;
-}
-
-async function initializeOpenSpec(destination: string): Promise<void> {
-  try {
-    await execFile("openspec", ["init", "--tools", "none", "--no-animation", "--no-copilot-cloud", destination]);
-  } catch (error) {
-    const details = error instanceof Error ? error.message : String(error);
-    throw new Error(`OpenSpec initialization failed: ${details}`);
-  }
-}
-
-function toPackageName(projectName: string): string {
-  return projectName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "project";
 }
