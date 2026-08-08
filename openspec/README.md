@@ -1,4 +1,5 @@
 # OpenSpec workspace
 
-This directory is reserved for OpenSpec artifacts. The CLI can also initialize it in generated projects.
+This directory contains the canonical OpenSpec specifications for this project.
 
+See [the canonical specifications](./specs/) for the current product contracts.
