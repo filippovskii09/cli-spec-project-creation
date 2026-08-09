@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the MVP contract for the `create-spec-project` command that scaffolds a project from the repository templates.
+Define the `create-spec-project` contract for creating a project from repository templates and optionally initializing OpenSpec.
 
 ## Requirements
 
@@ -17,7 +17,7 @@ The CLI SHALL expose the command as `create-spec-project <target>` and require e
 - **AND** exits with a non-zero exit code
 - **AND** does not write the success message
 
-### Requirement: Target directory policy
+### Requirement: Target directory preflight
 
 The CLI SHALL create a target directory that does not exist and SHALL use a target directory that already exists and is empty. A target directory containing any entry, including a hidden entry, SHALL be rejected during preflight before the CLI performs any directory creation, copy, or write operation. A preflight rejection SHALL not modify existing files or directories.
 
@@ -54,15 +54,42 @@ The `templates/` directory SHALL be the sole dynamic source for scaffold content
 - **THEN** the generated project contains every nested file and directory from `templates/`
 - **AND** the CLI adds no scaffold artifacts outside those copied from `templates/`
 
-### Requirement: Process output and exit status
+### Requirement: Interactive OpenSpec choice
 
-On success, the CLI SHALL exit with code `0`, write exactly `✔ Project created successfully\n` to standard output, and write nothing to standard error. On error, the CLI SHALL write a clear explanation of the cause to standard error, exit with a non-zero exit code, and not write the success message. The exact error-message text is not part of this contract.
+After a successful read-only target preflight, the CLI SHALL ask exactly one `@clack/prompts` confirmation question about OpenSpec initialization. The confirmation SHALL default to No. It SHALL not ask for a project name, destination, or any further OpenSpec input.
 
-#### Scenario: Successful scaffold reports exact output
+#### Scenario: Default or No choice creates only the scaffold
+
+- **WHEN** the user submits the default choice or selects No
+- **THEN** the CLI scaffolds only the template-driven project
+- **AND** does not execute OpenSpec
+
+#### Scenario: Yes initializes OpenSpec after scaffolding
+
+- **WHEN** the user selects Yes
+- **THEN** the CLI successfully completes `scaffoldProject()` before invoking OpenSpec
+- **AND** invokes `openspec init --tools none --no-animation --no-copilot-cloud` once with the generated absolute target as its working directory
+
+#### Scenario: Cancellation leaves no target
+
+- **WHEN** the user cancels the confirmation prompt
+- **THEN** the CLI reports cancellation and exits with code `0`
+- **AND** does not create a missing target, scaffold files, invoke OpenSpec, or write the success message
+
+#### Scenario: Preflight rejection does not display a prompt
+
+- **WHEN** the target is non-empty
+- **THEN** the CLI rejects it before displaying the OpenSpec prompt
+
+### Requirement: Process output, exit status, and integration errors
+
+On successful scaffolding and optional OpenSpec initialization, the CLI SHALL exit with code `0` and write `✔ Project created successfully` to standard output. Prompt output may precede this message. On error, the CLI SHALL write a clear explanation to standard error, exit non-zero, and not write the success message.
+
+#### Scenario: Successful scaffold reports success
 
 - **WHEN** a project is scaffolded successfully
 - **THEN** the command exits with code `0`
-- **AND** standard output is exactly `✔ Project created successfully\n`
+- **AND** standard output contains `✔ Project created successfully`
 - **AND** standard error is empty
 
 #### Scenario: Failed command reports an error without success output
@@ -72,15 +99,19 @@ On success, the CLI SHALL exit with code `0`, write exactly `✔ Project created
 - **AND** the command exits with a non-zero exit code
 - **AND** standard output does not contain `✔ Project created successfully`
 
+#### Scenario: OpenSpec initialization failure preserves the scaffold
+
+- **WHEN** OpenSpec exits unsuccessfully after a successful scaffold
+- **THEN** standard error contains `OpenSpec initialization failed:` and the underlying error context
+- **AND** the CLI exits non-zero without writing the success message
+- **AND** the generated scaffold remains in place without rollback
+
 ## Non-Goals
 
-- Interactive prompts
-- OpenSpec initialization
 - Git initialization
 - Package manager setup
 - `package.json` generation
 - Runtime stack generation
 - Framework presets
-- External command execution
 
-Copy failures are not required to provide atomic rollback. The preservation requirement applies only to preflight rejection of a non-empty target.
+Copy failures are not required to provide atomic rollback. The preservation requirement applies only to preflight rejection of a non-empty target; OpenSpec failures do not roll back a completed scaffold.
