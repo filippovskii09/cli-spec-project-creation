@@ -18,5 +18,9 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "execa": "^10.0.1"
   }
 }
