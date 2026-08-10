@@ -19,29 +19,29 @@ The CLI SHALL expose the command as `create-spec-project <target>` and require e
 
 ### Requirement: Target directory preflight
 
-The CLI SHALL create a target directory that does not exist and SHALL use a target directory that already exists and is empty. A target directory containing any entry, including a hidden entry, SHALL be rejected during preflight before the CLI performs any directory creation, copy, or write operation. A preflight rejection SHALL not modify existing files or directories.
+The CLI SHALL resolve the user-supplied target to an absolute destination. It SHALL create a destination that does not exist and SHALL use a destination that already exists and is empty. A destination containing any entry, including a hidden entry, SHALL be rejected during preflight before the CLI performs any directory creation, copy, or write operation. A preflight rejection SHALL not modify existing files or directories.
 
-#### Scenario: Missing target is created and populated from templates
+#### Scenario: Missing target creates and populates its destination from templates
 
-- **WHEN** the target directory does not exist
-- **THEN** the CLI creates the target directory
+- **WHEN** the target resolves to a destination that does not exist
+- **THEN** the CLI creates the destination
 - **AND** copies the complete contents of `templates/` into it with the same nested files and directories
 
-#### Scenario: Existing empty target is used
+#### Scenario: Existing empty destination is used
 
-- **WHEN** the target directory already exists and contains no entries
+- **WHEN** the destination already exists and contains no entries
 - **THEN** the CLI uses that directory as the scaffold destination
 - **AND** copies the complete contents of `templates/` into it
 
-#### Scenario: Non-empty target is detected before modification
+#### Scenario: Non-empty destination is detected before modification
 
-- **WHEN** the target directory contains any entry, including a hidden entry
-- **THEN** the CLI rejects the target during preflight
-- **AND** does not perform directory creation, copying, or writing for that target
+- **WHEN** the destination contains any entry, including a hidden entry
+- **THEN** the CLI rejects the destination during preflight
+- **AND** does not perform directory creation, copying, or writing for that destination
 
-#### Scenario: Existing target entries are preserved after rejection
+#### Scenario: Existing destination entries are preserved after rejection
 
-- **WHEN** the CLI rejects a non-empty target directory
+- **WHEN** the CLI rejects a non-empty destination
 - **THEN** every pre-existing entry and its contents remain unchanged
 
 ### Requirement: Template-driven scaffold contents
@@ -67,8 +67,9 @@ After a successful read-only target preflight, the CLI SHALL ask exactly one `@c
 #### Scenario: Yes initializes OpenSpec after scaffolding
 
 - **WHEN** the user selects Yes
+- **AND** the `openspec` executable is available through `PATH`
 - **THEN** the CLI successfully completes `scaffoldProject()` before invoking OpenSpec
-- **AND** invokes `openspec init --tools none --no-animation --no-copilot-cloud` once with the generated absolute target as its working directory
+- **AND** invokes `openspec init --tools none --no-animation --no-copilot-cloud` once with the resolved absolute destination as its working directory
 
 #### Scenario: Cancellation leaves no target
 
@@ -78,12 +79,12 @@ After a successful read-only target preflight, the CLI SHALL ask exactly one `@c
 
 #### Scenario: Preflight rejection does not display a prompt
 
-- **WHEN** the target is non-empty
+- **WHEN** the destination is non-empty
 - **THEN** the CLI rejects it before displaying the OpenSpec prompt
 
 ### Requirement: Process output, exit status, and integration errors
 
-On successful scaffolding and optional OpenSpec initialization, the CLI SHALL exit with code `0` and write `✔ Project created successfully` to standard output. Prompt output may precede this message. On error, the CLI SHALL write a clear explanation to standard error, exit non-zero, and not write the success message.
+On successful scaffolding and optional OpenSpec initialization, the CLI SHALL exit with code `0` and write `✔ Project created successfully` to standard output. Prompt output may precede this message. On error, the CLI SHALL write a clear explanation to standard error, exit non-zero, and not write the success message. When the user selects Yes, both an unavailable `openspec` executable and a non-zero OpenSpec exit code are integration failures.
 
 #### Scenario: Successful scaffold reports success
 
@@ -102,6 +103,13 @@ On successful scaffolding and optional OpenSpec initialization, the CLI SHALL ex
 #### Scenario: OpenSpec initialization failure preserves the scaffold
 
 - **WHEN** OpenSpec exits unsuccessfully after a successful scaffold
+- **THEN** standard error contains `OpenSpec initialization failed:` and the underlying error context
+- **AND** the CLI exits non-zero without writing the success message
+- **AND** the generated scaffold remains in place without rollback
+
+#### Scenario: Missing OpenSpec executable preserves the scaffold
+
+- **WHEN** the user selects Yes and the `openspec` executable is unavailable through `PATH` after a successful scaffold
 - **THEN** standard error contains `OpenSpec initialization failed:` and the underlying error context
 - **AND** the CLI exits non-zero without writing the success message
 - **AND** the generated scaffold remains in place without rollback

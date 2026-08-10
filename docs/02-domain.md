@@ -4,19 +4,19 @@
 
 ### Project
 
-Цільова директорія, у якій CLI створює структуру нового проекту.
+The destination where the CLI creates the new project structure. Internally, the destination is the resolved absolute filesystem path of the user-supplied target.
 
 ### Scaffold
 
-Набір файлів і директорій, які CLI створює в Project.
+The set of files and directories that the CLI creates in a Project.
 
 ### Template
 
-Файл-шаблон, який копіюється або рендериться в новий Project.
+A template file copied or rendered into a new Project.
 
 ### Project Documentation
 
-Базові документи:
+Core documents:
 
 * vision
 * domain
@@ -27,7 +27,7 @@
 
 ### Integration
 
-Опціональний зовнішній setup після scaffold.
+Optional external setup after scaffolding.
 
 V1 integration:
 
@@ -35,7 +35,7 @@ V1 integration:
 
 ### Agent Instructions
 
-Файли контексту для coding agents:
+Context files for coding agents:
 
 * `CLAUDE.md`
 * `AGENTS.md`

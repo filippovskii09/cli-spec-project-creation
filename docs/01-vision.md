@@ -2,40 +2,40 @@
 
 ## Problem
 
-Створення нового pet/project часто починається хаотично:
+Creating a new pet/project often starts chaotically:
 
-* вручну створюються docs;
-* опціонально ініціалізується OpenSpec;
-* окремо створюються `CLAUDE.md` / `AGENTS.md`;
-* структура між проектами відрізняється;
-* AI отримує різний контекст і workflow.
+* documentation is created manually;
+* OpenSpec is initialized optionally;
+* `CLAUDE.md` / `AGENTS.md` are created separately;
+* structure differs between projects;
+* AI receives inconsistent context and workflow.
 
 ## Vision
 
-`create-spec-project` — локальний CLI для швидкого створення однакової AI-native / spec-driven структури нового проекту.
+`create-spec-project` is a local CLI for quickly creating a consistent AI-native / spec-driven structure for a new project.
 
-CLI не визначає технологічний стек проекту.
+The CLI does not define the project's technology stack.
 
-Він створює базовий development framework від idea/discovery до implementation.
+It creates a basic development framework from idea/discovery to implementation.
 
 ## Target User
 
-Перший користувач — автор CLI.
+The first user is the CLI author.
 
 ## Core Value
 
-Одна команда повинна прибрати повторюваний setup нового проекту та дати однакову стартову структуру для AI-assisted development.
+One command should remove repetitive new-project setup and provide a consistent starting structure for AI-assisted development.
 
-Після positional target команда пропонує один інтерактивний вибір: ініціалізувати OpenSpec чи ні. Типовий вибір — No.
+After the positional target, the command offers one interactive choice: whether to initialize OpenSpec. The default choice is No.
 
 ## Non-Goals
 
-V1 не включає:
+V1 does not include:
 
-* генерацію frontend/backend stack;
-* plugin system;
+* frontend/backend stack generation;
+* a plugin system;
 * presets;
 * deployment;
 * CI/CD;
-* автоматичну генерацію бізнес-вимог;
-* складну конфігурацію.
+* automatic business-requirement generation;
+* complex configuration.
