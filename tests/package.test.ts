@@ -38,7 +38,7 @@ async function runCli(
   });
 }
 
-test("installed package supports interactive No, Yes, and cancellation", async () => {
+test("package contains only runtime files and installed CLI supports interactive No, Yes, and cancellation", async () => {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "create-spec-project-package-"));
   const packageDirectory = join(temporaryDirectory, "package");
   const consumerDirectory = join(temporaryDirectory, "consumer");
@@ -51,7 +51,29 @@ test("installed package supports interactive No, Yes, and cancellation", async (
   const packed = await execFile(process.execPath, [npmCli, "pack", "--json", "--ignore-scripts", "--pack-destination", packageDirectory], {
     cwd: projectRoot,
   });
-  const [{ filename }] = JSON.parse(packed.stdout) as Array<{ filename: string }>;
+  const [{ filename, files }] = JSON.parse(packed.stdout) as Array<{
+    filename: string;
+    files: Array<{ path: string }>;
+  }>;
+  assert.deepEqual(
+    files.map(({ path }) => path).sort(),
+    [
+      "README.md",
+      "dist/src/index.js",
+      "dist/src/openspec.js",
+      "dist/src/prompts.js",
+      "dist/src/scaffold.js",
+      "package.json",
+      "templates/AGENTS.md",
+      "templates/CLAUDE.md",
+      "templates/docs/01-vision.md",
+      "templates/docs/02-domain.md",
+      "templates/docs/03-use-cases.md",
+      "templates/docs/04-requirements.md",
+      "templates/docs/05-architecture.md",
+      "templates/docs/06-implementation-plan.md",
+    ],
+  );
 
   await execFile(process.execPath, [npmCli, "install", "--offline", "--ignore-scripts", "--omit=dev", "--no-save", "--no-package-lock", join(packageDirectory, filename)], {
     cwd: consumerDirectory,

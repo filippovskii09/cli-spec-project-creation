@@ -4,14 +4,16 @@
   "private": true,
   "type": "module",
   "files": [
-    "dist",
+    "dist/src",
     "templates"
   ],
   "bin": {
     "create-spec-project": "dist/src/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "prepack": "npm run build",
     "start": "node dist/src/index.js",
     "test": "npm run build && node --test dist/tests/**/*.test.js"
   },
