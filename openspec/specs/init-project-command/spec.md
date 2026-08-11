@@ -56,7 +56,7 @@ The `templates/` directory SHALL be the sole dynamic source for scaffold content
 
 ### Requirement: Interactive OpenSpec choice
 
-After a successful read-only target preflight, the CLI SHALL ask exactly one `@clack/prompts` confirmation question about OpenSpec initialization. The confirmation SHALL default to No. It SHALL not ask for a project name, destination, or any further OpenSpec input.
+After a successful read-only target preflight, the CLI SHALL ask exactly one `@clack/prompts` confirmation question, `Initialize OpenSpec?`. The confirmation SHALL default to No. It SHALL not ask for a project name, destination, or any further OpenSpec input.
 
 #### Scenario: Default or No choice creates only the scaffold
 
